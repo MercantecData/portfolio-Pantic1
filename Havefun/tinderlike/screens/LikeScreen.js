@@ -114,9 +114,9 @@ export default class App extends React.Component {
   
   likedislike = () =>{
     const data = {
-      userid: 1,
-      Matcheid: 1,
-      liketordislike: 1
+      userid: 0,
+      Matcheid: 0,
+      liketordislike: 0
     };
     axios.post('http://127.0.0.1:3000/like', data).then(dbres => {
       this.setState({userid: dbres.data[0], Matcheid: dbres.data[0]});
@@ -126,8 +126,7 @@ export default class App extends React.Component {
   }
 
   renderUsers = () => {
-  
-
+    
     
     return this.state.articles.map((item, i) => {
 
@@ -136,7 +135,7 @@ export default class App extends React.Component {
         
       }
       else if (i == this.state.currentIndex) {
-    
+
         return (
           
           <Animated.View
@@ -144,7 +143,7 @@ export default class App extends React.Component {
             key={item.id} style={[this.rotateAndTranslate, { height: SCREEN_HEIGHT - 120, width: SCREEN_WIDTH, padding: 10, position: 'absolute' }]}>
             <Animated.View style={{ opacity: this.likeOpacity, transform: [{ rotate: '-30deg' }], position: 'absolute', top: 50, left: 40, zIndex: 1000 }}>
               <Text style={{ borderWidth: 1, borderColor: 'green', color: 'green', fontSize: 32, fontWeight: '800', padding: 10 }}>LIKE</Text>
-           
+            
             </Animated.View>
 
             <Animated.View style={{ opacity: this.dislikeOpacity, transform: [{ rotate: '30deg' }], position: 'absolute', top: 50, right: 40, zIndex: 1000 }}>
@@ -205,7 +204,7 @@ export default class App extends React.Component {
         </View>
         <View style={{ flex: 1 }}>
         
-       
+  
           {this.renderUsers()}
         </View>
         <View style={{ height: 60 }}>
