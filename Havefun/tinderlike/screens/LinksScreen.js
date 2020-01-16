@@ -62,7 +62,7 @@ export default class SwipeScreen extends React.Component  {
             )
         })}  }
             
-        }}
+        }
         onSwiped={(cardIndex) => {console.log(cardIndex)}}
         onSwipedAll={() => {console.log('onSwipedAll')}}
         cardIndex={0}

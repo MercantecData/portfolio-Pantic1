@@ -16,7 +16,11 @@ export default class App extends React.Component {
     super();
     this.state = {  
       articles: [],
-      currentIndex: 0
+      currentIndex: 0,
+      userid:"",
+      Matcheid: "",
+      liketordislike: "",
+      data: "",
     }
   
     this.position = new Animated.ValueXY()
@@ -107,8 +111,24 @@ export default class App extends React.Component {
   });
 
   }
+  
+  likedislike = () =>{
+    const data = {
+      userid: 1,
+      Matcheid: 1,
+      liketordislike: 1
+    };
+    axios.post('http://127.0.0.1:3000/like', data).then(dbres => {
+      this.setState({userid: dbres.data[0], Matcheid: dbres.data[0]});
+      this.renderUsers(dbres.data[0]);
+    });
+   
+  }
+
   renderUsers = () => {
   
+
+    
     return this.state.articles.map((item, i) => {
 
       if (i < this.state.currentIndex) {
@@ -116,7 +136,7 @@ export default class App extends React.Component {
         
       }
       else if (i == this.state.currentIndex) {
-
+    
         return (
           
           <Animated.View
@@ -124,7 +144,7 @@ export default class App extends React.Component {
             key={item.id} style={[this.rotateAndTranslate, { height: SCREEN_HEIGHT - 120, width: SCREEN_WIDTH, padding: 10, position: 'absolute' }]}>
             <Animated.View style={{ opacity: this.likeOpacity, transform: [{ rotate: '-30deg' }], position: 'absolute', top: 50, left: 40, zIndex: 1000 }}>
               <Text style={{ borderWidth: 1, borderColor: 'green', color: 'green', fontSize: 32, fontWeight: '800', padding: 10 }}>LIKE</Text>
-
+           
             </Animated.View>
 
             <Animated.View style={{ opacity: this.dislikeOpacity, transform: [{ rotate: '30deg' }], position: 'absolute', top: 50, right: 40, zIndex: 1000 }}>
@@ -135,7 +155,7 @@ export default class App extends React.Component {
             <View style={styles.Brugerview}>
             <Image
               style={{ flex: 1, height: null, width: null, resizeMode: 'cover', borderRadius: 20 }}
-              source={"require('"+item.url+"')"} />
+              source={require('../assets/images/mig.png')} />
               <Text style={styles.navn}>{item.name} <Text style={styles.year}>{item.year}</Text></Text>
               <Text style={styles.work}>{item.job}</Text>
               <Text style={styles.city}>{item.city}</Text>
@@ -184,6 +204,8 @@ export default class App extends React.Component {
 
         </View>
         <View style={{ flex: 1 }}>
+        
+       
           {this.renderUsers()}
         </View>
         <View style={{ height: 60 }}>

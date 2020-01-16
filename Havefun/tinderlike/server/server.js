@@ -22,9 +22,6 @@ con.connect((err) => {
   else console.log('Connection to Database established');
 });
 
-
-
-
 var server = app.listen(3000, "127.0.0.1", function () {
  
   var host = server.address().address
@@ -40,3 +37,12 @@ app.get("/users", (req, res) =>
     res.send(result);
   })
 );
+
+app.post("/Like", (req, res) => { 
+  con.query("INSERT INTO likedis (userid, Matcheid, liketordislike) VALUES (?, ?, ?)", [req.body.userid, req.body.Matcheid, req.body.liketordislike], function(err, result, fields){//This is the query were we define wich data we are going to put in the database
+    console.log(req.body);
+
+    res.send("Success!");//If it sends data in the database then it will prin succes
+
+  });
+})
