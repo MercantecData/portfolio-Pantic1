@@ -1,283 +1,242 @@
-import React from 'react';
-import { StyleSheet, Text, View, Dimensions, Image, Animated, PanResponder } from 'react-native';
+import React, { Component } from 'react';
+import { StyleSheet, Text, View,Button, Dimensions, Image, Animated, PanResponder, TouchableOpacity } from 'react-native';
 import axios from 'axios';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { LinearGradient } from 'expo-linear-gradient';
+import Constants from 'expo-constants';
+import * as ImagePicker from 'expo-image-picker';
+import { getUserInfo } from '../server/FetchUser';
 
-const SCREEN_HEIGHT = Dimensions.get('window').height
-const SCREEN_WIDTH = Dimensions.get('window').width
-import Icon from 'react-native-vector-icons/Ionicons'
-//uri: require('../assets/images/mig.png')
+export default class App extends Component {
+  state = {
+    image: null,
+    person: null,
+  };
+async componentDidMount(){
 
-const Users = [{"id":1,"name":"Mladen","uri": require('../assets/images/mig.png'),"lastname":"Pantic","year":19,"job":"tjener\r\n","about":"jeg er sÃ¸d","firma":"mpfixer","School":"mercantec","city":"silkeborg","gender":"mand"},{"id":2,"name":"Hans","uri": require('../assets/images/mig.png'),"lastname":"Pantic","year":19,"job":"tjener\r\n","about":"ikke sÃ¥ sÃ¸d","firma":"mpfixer","School":"mercantec","city":"silkeborg","gender":"mand"}]
+};
 
-export default class App extends React.Component {
 
-  
-  constructor() {
-    super();
-    this.state = {  
-      articles: [],
-      currentIndex: 0,
-      userid:"",
-      Matcheid: "",
-      liketordislike: "",
-      data: "",
-    }
-  
-    this.position = new Animated.ValueXY()
-    
-    this.rotate = this.position.x.interpolate({
-      inputRange: [-SCREEN_WIDTH /2 ,0, SCREEN_WIDTH /2],
-      outputRange: ['-30deg', '0deg', '10deg'],
-      extrapolate: 'clamp'
-    })
 
-    this.rotateAndTranslate = {
-      transform: [{
-        rotate: this.rotate
-      },
-      ...this.position.getTranslateTransform()
-      ]
-    }
 
-    this.likeOpacity = this.position.x.interpolate({
-      inputRange: [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
-      outputRange: [0, 0, 1],
-      extrapolate: 'clamp'
-    })
-    this.dislikeOpacity = this.position.x.interpolate({
-      inputRange: [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
-      outputRange: [1, 0, 0],
-      extrapolate: 'clamp'
-    })
-
-    this.nextCardOpacity = this.position.x.interpolate({
-      inputRange: [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
-      outputRange: [1, 0, 1],
-      extrapolate: 'clamp'
-    })
-    this.nextCardScale = this.position.x.interpolate({
-      inputRange: [-SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2],
-      outputRange: [1, 0.8, 1],
-      extrapolate: 'clamp'
-    })
-
-  }
-
-  UNSAFE_componentWillMount() {
-  
-
-    /// laver swipe funtioen
-    this.PanResponder = PanResponder.create({
-
-      onStartShouldSetPanResponder: (evt, gestureState) => true,
-      onPanResponderMove: (evt, gestureState) => {
-
-        this.position.setValue({ x: gestureState.dx, y: gestureState.dy })
-      },
-      onPanResponderRelease: (evt, gestureState) => {
-
-        if (gestureState.dx > 120) {
-          Animated.spring(this.position, {
-            toValue: { x: SCREEN_WIDTH + 100, y: gestureState.dy }
-          }).start(() => {
-            this.setState({ currentIndex: this.state.currentIndex + 1 }, () => {
-              this.position.setValue({ x: 0, y: 0 })
-            })
-          })
-        }
-        else if (gestureState.dx < -120) {
-          Animated.spring(this.position, {
-            toValue: { x: -SCREEN_WIDTH - 100, y: gestureState.dy }
-          }).start(() => {
-            this.setState({ currentIndex: this.state.currentIndex + 1 }, () => {
-              this.position.setValue({ x: 0, y: 0 })
-            })
-          })
-        }
-        else {
-          Animated.spring(this.position, {
-            toValue: { x: 0, y: 0 },
-            friction: 4
-          }).start()
-        }
-      }
-    })
-    this.fetchData();
-  }
-  fetchData = async () => {
-    axios.get("http://127.0.0.1:3000/users").then(res => {
-      this.setState({ articles: res.data});
-      console.log(res.data);
-  });
-
-  }
-  
-  likedislike = () =>{
-    const data = {
-      userid: 0,
-      Matcheid: 0,
-      liketordislike: 0
-    };
-    axios.post('http://127.0.0.1:3000/like', data).then(dbres => {
-      this.setState({userid: dbres.data[0], Matcheid: dbres.data[0]});
-      this.renderUsers(dbres.data[0]);
+pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+      base64: true
     });
-   
+    if (!result.cancelled) {
+      this.setState({ image: result.uri })
+      
+      let base64Img = `data:image/jpg;base64,${result.base64}`
+      
+      //Add your cloud name
+      let apiUrl = 'http://127.0.0.1:3000/image';
+  
+      let data = {
+        "file": base64Img,
+      }
+
+      fetch(apiUrl, {
+        body: JSON.stringify(data),
+        headers: {
+          'content-type': 'application/json'
+        },
+        method: 'POST',
+      }).then(async r => {
+          let data = await r.json()
+          console.log(data.secure_url)
+          return data.secure_url
+    }).catch(err=>console.log(err))
   }
 
-  renderUsers = () => {
-    
-    
-    return this.state.articles.map((item, i) => {
-
-      if (i < this.state.currentIndex) {
-        return null
-        
-      }
-      else if (i == this.state.currentIndex) {
-
-        return (
-          
-          <Animated.View
-            {...this.PanResponder.panHandlers}
-            key={item.id} style={[this.rotateAndTranslate, { height: SCREEN_HEIGHT - 120, width: SCREEN_WIDTH, padding: 10, position: 'absolute' }]}>
-            <Animated.View style={{ opacity: this.likeOpacity, transform: [{ rotate: '-30deg' }], position: 'absolute', top: 50, left: 40, zIndex: 1000 }}>
-              <Text style={{ borderWidth: 1, borderColor: 'green', color: 'green', fontSize: 32, fontWeight: '800', padding: 10 }}>LIKE</Text>
-            
-            </Animated.View>
-
-            <Animated.View style={{ opacity: this.dislikeOpacity, transform: [{ rotate: '30deg' }], position: 'absolute', top: 50, right: 40, zIndex: 1000 }}>
-              <Text style={{ borderWidth: 1, borderColor: 'red', color: 'red', fontSize: 32, fontWeight: '800', padding: 10 }}>NOPE</Text>
-
-            </Animated.View>
-
-            <View style={styles.Brugerview}>
-            <Image
-              style={{ flex: 1, height: null, width: null, resizeMode: 'cover', borderRadius: 20 }}
-              source={require('../assets/images/mig.png')} />
-              <Text style={styles.navn}>{item.name} <Text style={styles.year}>{item.year}</Text></Text>
-              <Text style={styles.work}>{item.job}</Text>
-              <Text style={styles.city}>{item.city}</Text>
-              </View>
-          </Animated.View>
-        )
-      }
-      else {
-        return (
-          
-          <Animated.View
-
-            key={item.id} style={[{
-              opacity: this.nextCardOpacity,
-              transform: [{ scale: this.nextCardScale }],
-              height: SCREEN_HEIGHT - 120, width: SCREEN_WIDTH, padding: 10, position: 'absolute'
-            }]}>
-            <Animated.View style={{ opacity: 0, transform: [{ rotate: '-30deg' }], position: 'absolute', top: 50, left: 40, zIndex: 1000 }}>
-              <Text style={{ borderWidth: 1, borderColor: 'green', color: 'green', fontSize: 32, fontWeight: '800', padding: 10 }}>LIKE</Text>
-
-            </Animated.View>
-
-            <Animated.View style={{ opacity: 0, transform: [{ rotate: '30deg' }], position: 'absolute', top: 50, right: 40, zIndex: 1000 }}>
-              <Text style={{ borderWidth: 1, borderColor: 'red', color: 'red', fontSize: 32, fontWeight: '800', padding: 10 }}>NOPE</Text>
-
-            </Animated.View>
-            <View style={styles.Brugerview}>
-            <Image
-              style={{ flex: 1, height: null, width: null, resizeMode: 'cover', borderRadius: 20 }}
-              source={require('../assets/images/mig.png')} />
-              <Text style={styles.navn}>{item.name} <Text style={styles.year}>{item.year}</Text></Text>
-              <Text style={styles.work}>{item.job}</Text>
-              <Text style={styles.city}>{item.city}</Text>
-              </View>
-          </Animated.View>
-          
-        )
-      }
-    }).reverse()
-  }
+}
 
   render() {
     return (
-      <View style={{ flex: 1 }}>
-        <View style={{ height: 60 }}>
+      <View style = { styles.container }>
+          <Image style={styles.billede} source={{uri: `data:image/gif;base64,${this.state.Text}`}}></Image>
+          <Text style={styles.navn}>,</Text>
+          <Text style={styles.year}>21</Text>
+          <Text style={styles.school}>Mercantec</Text>
+          
+          <TouchableOpacity style={styles.settings}><Icon raised name='cog' size={37} type='font-awesome' color='#c9c5c5' onPress={() => console.log('hello')} /></TouchableOpacity>
+          <TouchableOpacity style={styles.info}><Icon raised name='pencil' size={37} type='font-awesome' color='#c9c5c5' /></TouchableOpacity>
+          <TouchableOpacity onPress={()=>this.pickImage()} style={styles.plus}><Icon raised name='plus' size={17} type='font-awesome' color='#c9c5c5' onPress={() => console.log('hello')} /></TouchableOpacity>
+          <Text style={styles.Instillingertext}>Instillinger</Text>
+          <Text style={styles.Redigertext}>Rediger INFO</Text>
+          <Text style={styles.addimagetext}>Tilføj billede</Text>
 
-        </View>
-        <View style={{ flex: 1 }}>
-        
-  
-          {this.renderUsers()}
-        </View>
-        <View style={{ height: 60 }}>
-
-        </View>
-
-
+          <LinearGradient colors={['#ff9999', '#ff0000']} style={styles.addimage}>
+          <Icon raised name='camera' size={45} type='font-awesome' color='#fff' onPress={() => console.log('hello')} />
+          <TouchableOpacity onPress={()=>this.pickImage()} style={styles.addimage} ></TouchableOpacity>
+          </LinearGradient>
+          <View style={styles.mainview} />
       </View>
-
     );
   }
 }
-
 const styles = StyleSheet.create({
-
+  container:
+  {
+      flex: 1,
+      backgroundColor: '#f7f7f7' // Set your own custom Color
+  },
+  billede: {
+    marginLeft: '30%',
+    top: 150,
+    height: 150,
+    width: 100,
+    borderRadius: 100,
+    zIndex: 3,
+    position: "absolute",
+  },
   navn: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#ffff',
-    top: '2%',
-    left: '5%',
-    position: 'absolute', 
-    zIndex: 999,
+  fontSize: 28,
+  top: 310,
+  marginLeft: '33%',
+  fontWeight: '500',
+  fontFamily: 'Avenir',
+  zIndex: 4,
+  position: "absolute",
   },
   year: {
-    fontSize: 20,
-    fontWeight: '400',
-    color: '#ffff',
-    position: 'absolute', 
-    zIndex: 998,
-  },
-  city: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#ffff',
-    top: '7.5%',
-    left: '5%',
-    position: 'absolute', 
-    zIndex: 997,
-  },
-  work: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#ffff',
-    top: '5%',
-    left: '5%',
-    position: 'absolute', 
-    zIndex: 996,
-  },
-
-  Bruger2: {
-    height: '80%',
-    width: '95%',
-    position: 'absolute', 
-    zIndex: 900,
-    borderRadius: 10,
-  },
-  Brugerview: {
-    height: '105%',
-    width: '106%',
-    position: 'absolute', 
-    zIndex: 899,
-    top: '0%',
-    left: '0.1%',
-    borderRadius: 10,
-    shadowColor: 'black',
-    shadowOffset: {
-      width: 0,
-      height: 2,
+    fontSize: 30,
+    top: 308,
+    marginLeft: '58%',
+    fontWeight: '500',
+    fontFamily: 'Avenir',
+    zIndex: 5,
+    position: "absolute",
+    }, 
+  school: {
+      fontSize: 15,
+      top: 350,
+      marginLeft: '40%',
+      fontWeight: '300',
+      fontFamily: 'Avenir',
+      zIndex: 6,
+      position: "absolute",
+    }, 
+  settings: {
+    borderWidth:1,
+    borderColor:'#fff',
+    alignItems:'center',
+    justifyContent:'center',
+    width:65,
+    height:65,
+    backgroundColor:'#fff',
+    borderRadius:50,
+    zIndex: 7,
+    position: "absolute",
+    top: 380,
+    left: '10%',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    shadowOffset: { width: 1, height: 10 },
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  
-  }
+  info: {
+    borderWidth:1,
+       borderColor:'#fff',
+       alignItems:'center',
+       justifyContent:'center',
+       width:65,
+       height:65,
+       backgroundColor:'#fff',
+       borderRadius:50,
+       zIndex: 8,
+       position: "absolute",
+       top: 380,
+       left: '73%',
+       shadowColor: '#000',
+       shadowOpacity: 0.2,
+       shadowRadius: 10,
+       shadowOffset: { width: 1, height: 10 },
+    },
+  addimage:{
+      width: 100,
+      height: 100,
+      zIndex: 9,
+      position: "absolute",
+      top: 400,
+      left: '38%',
+      alignItems: 'center', 
+      justifyContent: 'center',
+      borderRadius: 50,
+      shadowColor: '#000',
+      shadowOpacity: 0.3,
+      shadowRadius: 10,
+      shadowOffset: { width: 1, height: 10 },
+    },
+    plus:{
+      borderWidth:1,
+      borderColor:'#fff',
+      alignItems:'center',
+      justifyContent:'center',
+      width:35,
+      height:35,
+      backgroundColor:'#fff',
+      borderRadius:50,
+      zIndex: 10,
+      position: "absolute",
+      top: 470,
+      left: '55%',
+      shadowColor: '#000',
+      shadowOpacity: 0.2,
+      shadowRadius: 10,
+      shadowOffset: { width: 1, height: 10 },
+    },
+    mainview: {
+      marginTop: -60,
+      width: 250,
+      height: 640,
+      backgroundColor: '#fff',
+      borderRadius: 90,
+      transform: [{ scaleX: 2 }],
+      left:87,
+      zIndex: 0,
+      position: "absolute",
+      shadowColor: '#000',
+      shadowOpacity: 0.1,
+      shadowRadius: 10,
+      shadowOffset: { width: 1, height: 10 },
+    },
+    Instillingertext:{
+      fontSize: 15,
+      top: 455,
+      marginLeft: '6%',
+      fontWeight: '300',
+      fontFamily: 'Avenir',
+      zIndex: 6,
+      position: "absolute",
+      textTransform: 'uppercase',
+      color: '#ababab',
+      fontWeight: '600',
+    },
+    Redigertext:{
+      fontSize: 15,
+      top: 455,
+      marginLeft: '68%',
+      fontWeight: '300',
+      fontFamily: 'Avenir',
+      zIndex: 6,
+      position: "absolute",
+      textTransform: 'uppercase',
+      color: '#ababab',
+      fontWeight: '600',
+    },
+    addimagetext:{
+      fontSize: 15,
+      top: 520,
+      marginLeft: '36%',
+      fontWeight: '300',
+      fontFamily: 'Avenir',
+      zIndex: 6,
+      position: "absolute",
+      textTransform: 'uppercase',
+      color: '#ababab',
+      fontWeight: '600',
+    },
+ 
 });

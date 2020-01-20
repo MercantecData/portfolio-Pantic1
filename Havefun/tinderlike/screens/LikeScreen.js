@@ -82,6 +82,7 @@ export default class App extends React.Component {
           }).start(() => {
             this.setState({ currentIndex: this.state.currentIndex + 1 }, () => {
               this.position.setValue({ x: 0, y: 0 })
+       
             })
           })
         }
@@ -183,7 +184,7 @@ export default class App extends React.Component {
             </Animated.View>
             <View style={styles.Brugerview}>
             <Image
-              style={{ flex: 1, height: null, width: null, resizeMode: 'cover', borderRadius: 20 }}
+              style={{ flex: 1, height: null, width: null, resizeMode: 'contain', borderRadius: 20 }}
               source={require('../assets/images/mig.png')} />
               <Text style={styles.navn}>{item.name} <Text style={styles.year}>{item.year}</Text></Text>
               <Text style={styles.work}>{item.job}</Text>
@@ -198,17 +199,11 @@ export default class App extends React.Component {
 
   render() {
     return (
-      <View style={{ flex: 1 }}>
-        <View style={{ height: 60 }}>
-
-        </View>
-        <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, height: '19%' }}>
+        <View style={{ flex: 1, top: '5%'}}>
         
   
           {this.renderUsers()}
-        </View>
-        <View style={{ height: 60 }}>
-
         </View>
 
 
@@ -263,12 +258,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   Brugerview: {
-    height: '105%',
-    width: '106%',
+    height: '90%',
+    width: '99%',
     position: 'absolute', 
     zIndex: 899,
     top: '0%',
-    left: '0.1%',
+    left: '3%',
     borderRadius: 10,
     shadowColor: 'black',
     shadowOffset: {
