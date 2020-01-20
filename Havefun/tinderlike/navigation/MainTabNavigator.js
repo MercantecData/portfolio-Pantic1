@@ -4,10 +4,9 @@ import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 
 import TabBarIcon from '../components/TabBarIcon';
-import HomeScreen from '../screens/ProfileScreen';
-import SwipeScreen from '../screens/LikeScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import LikeScreen from '../screens/LikeScreen';
 import ChatScreen from '../screens/ChatScreen';
-import { NavigationEvents } from 'react-navigation';
 
 const config = Platform.select({
   web: { headerMode: 'screen' },
@@ -16,47 +15,42 @@ const config = Platform.select({
 
 const HomeStack = createStackNavigator(
   {
-    Home: HomeScreen,
+    Home: ProfileScreen,
   },
   config
 );
 
 HomeStack.navigationOptions = {
+  tabBarLabel: 'Home',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
       name={
         Platform.OS === 'ios'
-          ? `ios-person${focused ? '' : ''}`
-          : 'md-person'
+          ? `ios-information-circle${focused ? '' : '-outline'}`
+          : 'md-information-circle'
       }
-      
     />
   ),
-  tabBarOptions: {
-    showLabel: false
-  }
 };
 
 HomeStack.path = '';
 
-const SwipeStack = createStackNavigator(
+const LinksStack = createStackNavigator(
   {
-    Links: SwipeScreen,
+    Links: LikeScreen,
   },
   config
 );
 
-SwipeStack.navigationOptions = {
+LinksStack.navigationOptions = {
+  tabBarLabel: 'Links',
   tabBarIcon: ({ focused }) => (
-    <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-flame' : 'md-flame'} />
+    <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-link' : 'md-link'} />
   ),
-  tabBarOptions: {
-    showLabel: false
-  }
 };
 
-SwipeStack.path = '';
+LinksStack.path = '';
 
 const SettingsStack = createStackNavigator(
   {
@@ -66,19 +60,17 @@ const SettingsStack = createStackNavigator(
 );
 
 SettingsStack.navigationOptions = {
+  tabBarLabel: 'Settings',
   tabBarIcon: ({ focused }) => (
-    <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-chatbubbles' : 'md-chatbubbles'} />
+    <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-options' : 'md-options'} />
   ),
-  tabBarOptions: {
-    showLabel: false
-  }
 };
 
 SettingsStack.path = '';
 
 const tabNavigator = createBottomTabNavigator({
   HomeStack,
-  SwipeStack,
+  LinksStack,
   SettingsStack,
 });
 

@@ -7,11 +7,7 @@ const path = require('path');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'build')));
-app.use(bodyParser.urlencoded({
-  limit: "50mb",
-  extended: false
-}));
-app.use(bodyParser.json({limit: "50mb"}));
+
 const con = mysql.createConnection({//here we are creating a connection
   host     : "localhost",
     user     : "root",
@@ -50,23 +46,3 @@ app.post("/Like", (req, res) => {
 
   });
 })
-
-
-app.post("/image", (req, res) => { 
-  con.query('UPDATE `users` SET `url`="?" WHERE `id`="1" ', [req.body.file], function(err, result, fields){//This is the query were we define wich data we are going to put in the database
-    console.log(req.body);
-
-    res.send("Success!");//If it sends data in the database then it will prin succes
-
-  });
-})
-
-
-app.get("/getprofilbillede", (req, res) => { 
-  con.query('select * from users WHERE id="1"', (err, result) => {
-    if (err) throw err;
-    res.send(result);
-  })
-})
-
-global.brugerid = "9";
