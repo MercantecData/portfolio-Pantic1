@@ -13,3 +13,5 @@
 ## du sætter en server med database phpmyadmin og laver indsætter sql filen, som ligger i havefun mappen
 
 ## måske skal du også ændre ipen i server.js
+
+## du skal også kører server.js på sammen tid "node server.js" 
