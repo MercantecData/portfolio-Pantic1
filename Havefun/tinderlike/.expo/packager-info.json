@@ -2,8 +2,9 @@
   "devToolsPort": 19002,
   "expoServerPort": 19000,
   "packagerPort": 19001,
-  "packagerPid": 1067,
-  "expoServerNgrokUrl": "https://vi-5g2.anonymous.tinderlike.exp.direct",
-  "packagerNgrokUrl": "https://packager.vi-5g2.anonymous.tinderlike.exp.direct",
-  "ngrokPid": 1087
+  "packagerPid": 5111,
+  "expoServerNgrokUrl": "https://is-gqu.anonymous.tinderlike.exp.direct",
+  "packagerNgrokUrl": "https://packager.is-gqu.anonymous.tinderlike.exp.direct",
+  "ngrokPid": 5128,
+  "webpackServerPort": null
 }
